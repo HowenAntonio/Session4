@@ -51,9 +51,9 @@ function LayoutContent({ children }) {
 
       <main className={styles.main}>{children}</main>
 
-      <footer className={styles.footer}>
+      {/* <footer className={styles.footer}>
         &copy; 2026 Firebase Auth App &mdash; 2602123622
-      </footer>
+      </footer> */}
     </div>
   );
 }
