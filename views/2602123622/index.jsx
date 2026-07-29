@@ -1,52 +1,139 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+"use client";
 
-const MyPage = () => {
+import { useState, useEffect, useRef, useMemo } from "react";
+
+import styles from "./style.module.css";
+
+export default function MyPage() {
   const [count, setCount] = useState(0);
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [search, setSearch] = useState("");
   const inputRef = useRef(null);
-  const doubled = useMemo(() => count * 2, [count]);
+  const doubled = useMemo(() => {
+    return count * 2;
+  }, [count]);
 
   useEffect(() => {
     inputRef.current?.focus();
+
+    async function fetchPosts() {
+      try {
+        const response = await fetch(
+          "https://jsonplaceholder.typicode.com/posts?_limit=10",
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed fetching posts");
+        }
+
+        const data = await response.json();
+
+        setPosts(data);
+      } catch (err) {
+        console.error(err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchPosts();
   }, []);
 
+  const filteredPosts = useMemo(() => {
+    if (!search.trim()) {
+      return posts;
+    }
+
+    const keyword = search.toLowerCase();
+
+    return posts.filter((post) => {
+      const title = post.title?.toLowerCase() || "";
+      const body = post.body?.toLowerCase() || "";
+      return title.includes(keyword) || body.includes(keyword);
+    });
+  }, [posts, search]);
+
+  const totalWords = useMemo(() => {
+    return filteredPosts.reduce(
+      (total, post) => {
+        return total + (post.body?.split(" ").length || 0);
+      },
+
+      0,
+    );
+  }, [filteredPosts]);
+
+  if (loading) {
+    return (
+      <div className={styles.loading}>
+        <div className={styles.spinner}></div>
+        <p>Loading posts...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className={styles.errorBox}>
+        <h2>Error</h2>
+        <p>{error}</p>
+      </div>
+    );
+  }
+
   return (
-    <div style={{ padding: '2rem', maxWidth: '600px', margin: '0 auto', fontFamily: 'Arial, sans-serif' }}>
-      <h1 style={{ color: '#2c3e50' }}>Howen Antonio - 2602123622</h1>
-      <p style={{ fontSize: '1.1rem', color: '#34495e' }}>Computer Science</p>
-      
-      <div style={{ margin: '1.5rem 0' }}>
-        <input
-          ref={inputRef}
-          placeholder="Type something..."
-          style={{
-            padding: '0.6rem',
-            marginRight: '1rem',
-            border: '1px solid #ddd',
-            borderRadius: '4px',
-            fontSize: '1rem'
-          }}
-        />
-        <button
-          onClick={() => setCount(prev => prev + 1)}
-          style={{
-            padding: '0.6rem 1.2rem',
-            backgroundColor: '#3498db',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer',
-            fontSize: '1rem'
-          }}
-        >
-          Clicked {count} times
-        </button>
+    <div className={styles.posts}>
+      <section className={styles.profile}>
+        <h1 className={styles.title}>Howen Antonio - 2602123622</h1>
+        <p className={styles.subtitle}>Computer Science Student</p>
+        <div className={styles.action}>
+          <input
+            ref={inputRef}
+            className={styles.input}
+            placeholder="Type something..."
+          />
+          <button
+            className={styles.button}
+            onClick={() => setCount((prev) => prev + 1)}
+          >
+            Clicked {count} times
+          </button>
+        </div>
+
+        <p className={styles.subtitle}>
+          Doubled count: <b>{doubled}</b>
+        </p>
+      </section>
+
+      <section>
+        <h2 className={styles.heading}>Posts</h2>
+        <div className={styles.searchBox}>
+          <input
+            className={styles.search}
+            placeholder="Search posts..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+          <span className={styles.counter}>{filteredPosts.length} posts</span>
+        </div>
+      </section>
+
+      <div className={styles.postList}>
+        {filteredPosts.map((post) => (
+          <article key={post.id} className={styles.card}>
+            <h3 className={styles.cardTitle}>{post.title}</h3>
+            <p className={styles.cardText}>{post.body}</p>
+            <span className={styles.badge}>Post #{post.id}</span>
+          </article>
+        ))}
       </div>
 
-      <p style={{ fontSize: '1rem', color: '#7f8c8d' }}>
-        Doubled count: <strong>{doubled}</strong>
-      </p>
+      <div className={styles.total}>
+        Total words: <b>{totalWords}</b>
+      </div>
     </div>
   );
-};
-
-export default MyPage;
+}

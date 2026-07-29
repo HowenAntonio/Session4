@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useMemo } from "react";
 import Link from "next/link";
+import styles from "../style.module.css";
 
 export default function DetailsPage() {
   const [post, setPost] = useState(null);
@@ -37,64 +38,55 @@ export default function DetailsPage() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-[400px]">
-        <p className="text-lg text-gray-500 animate-pulse">Loading post...</p>
+      <div className={styles.loading}>
+        <div className={styles.spinner}></div>
+        <p className={styles.loadingText}>Loading post...</p>
       </div>
     );
   }
 
   if (!post) {
     return (
-      <div className="text-center py-10">
-        <p className="text-red-500 text-lg">Post not found.</p>
+      <div className={styles.errorBox}>
+        <h2>Error</h2>
+        <p>Post not found.</p>
         <Link href="/2602123622">
-          <button className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition">
-            Back to Home
-          </button>
+          <button className={styles.button}>Back to Home</button>
         </Link>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-indigo-700">📄 Post Details</h2>
+    <div className={styles.posts}>
+      <h2 className={styles.heading}>Post Details</h2>
 
       <div
         ref={contentRef}
-        className={`p-6 bg-white rounded-lg shadow border transition-all duration-300 ${
-          highlight ? "border-yellow-400 bg-yellow-50" : "border-gray-200"
+        className={`${styles.card} ${
+          highlight ? styles.cardHighlight : ""
         }`}
       >
-        <span className="inline-block text-xs font-medium text-indigo-500 bg-indigo-50 px-2 py-1 rounded mb-3">
-          Post #{post.id}
-        </span>
-        <h3 className="text-xl font-semibold text-gray-800 mb-3 capitalize">
-          {post.title}
-        </h3>
-        <p className="text-gray-600 leading-relaxed">{post.body}</p>
+        <span className={styles.badge}>Post #{post.id}</span>
+        <h3 className={styles.cardTitle}>{post.title}</h3>
+        <p className={styles.cardText}>{post.body}</p>
       </div>
 
-      <div className="flex gap-4 flex-wrap text-sm text-gray-500">
-        <div className="px-4 py-2 bg-gray-100 rounded">
+      <div className={styles.stats}>
+        <div className={styles.stat}>
           <strong>Characters:</strong> {charCount}
         </div>
-        <div className="px-4 py-2 bg-gray-100 rounded">
+        <div className={styles.stat}>
           <strong>Words:</strong> {wordCount}
         </div>
       </div>
 
-      <div className="flex gap-3">
-        <button
-          onClick={handleHighlight}
-          className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition font-medium"
-        >
+      <div className={styles.action}>
+        <button onClick={handleHighlight} className={styles.button}>
           {highlight ? "Remove Highlight" : "Highlight"}
         </button>
         <Link href="/2602123622">
-          <button className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition font-medium">
-            ← Back to Home
-          </button>
+          <button className={styles.button}>← Back to Home</button>
         </Link>
       </div>
     </div>
